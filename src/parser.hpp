@@ -117,10 +117,9 @@ public:
 
     std::optional<NodeStmt*> parse_stmt()
     {
-        if (peek().value().type == TokenType::exit && peek(1).has_value()
-            && peek(1).value().type == TokenType::open_paren) {
+        if (peek().value().type == TokenType::exit) {
             consume();
-            consume();
+            try_consume(TokenType::open_paren, "Expected `(`");
             auto stmt_exit = m_allocator.alloc<NodeStmtExit>();
             if (auto node_expr = parse_expr()) {
                 stmt_exit->expr = node_expr.value();
@@ -135,14 +134,11 @@ public:
             stmt->var = stmt_exit;
             return stmt;
         }
-        else if (
-            peek().has_value() && peek().value().type == TokenType::let && peek(1).has_value()
-            && peek(1).value().type == TokenType::ident && peek(2).has_value()
-            && peek(2).value().type == TokenType::eq) {
+        else if (peek().value().type == TokenType::let) {
             consume();
             auto stmt_let = m_allocator.alloc<NodeStmtLet>();
-            stmt_let->ident = consume();
-            consume();
+            stmt_let->ident = try_consume(TokenType::ident, "Expected identifier");
+            try_consume(TokenType::eq, "Expected `=`");
             if (auto expr = parse_expr()) {
                 stmt_let->expr = expr.value();
             }
