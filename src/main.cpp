@@ -39,8 +39,8 @@ int main(int argc, char* argv[])
         file << generator.gen_prog();
     }
 
-    system("nasm -felf64 out.asm");
-    system("ld -o out out.o");
+    system("nasm -fwin64 out.asm");
+    system("link msvcrt.lib kernel32.lib out.obj /subsystem:console");
 
     return EXIT_SUCCESS;
 }
