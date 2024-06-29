@@ -4,18 +4,19 @@
 #include <vector>
 
 enum class TokenType { exit, int_lit, semi, open_paren, close_paren, ident, let, eq, plus, star, sub, div };
+enum class BinOp { add = (int)TokenType::plus, mul, sub, div };
 
-std::optional<int> bin_prec(TokenType type)
+int bin_prec(BinOp op)
 {
-    switch (type) {
-    case TokenType::sub:
-    case TokenType::plus:
-        return 0;
-    case TokenType::div:
-    case TokenType::star:
+    switch (op) {
+    case BinOp::sub:
+    case BinOp::add:
         return 1;
+    case BinOp::div:
+    case BinOp::mul:
+        return 2;
     default:
-        return {};
+        return 0;
     }
 }
 

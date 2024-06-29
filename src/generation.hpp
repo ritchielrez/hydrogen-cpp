@@ -40,52 +40,6 @@ public:
         std::visit(visitor, term->var);
     }
 
-    void gen_bin_expr(const NodeBinExpr* bin_expr)
-    {
-        struct BinExprVisitor {
-            Generator* gen;
-            void operator()(const NodeBinExprSub* sub) const
-            {
-                gen->gen_expr(sub->rhs);
-                gen->gen_expr(sub->lhs);
-                gen->pop("rax");
-                gen->pop("rbx");
-                gen->m_output << "    sub rax, rbx\n";
-                gen->push("rax");
-            }
-            void operator()(const NodeBinExprAdd* add) const
-            {
-                gen->gen_expr(add->rhs);
-                gen->gen_expr(add->lhs);
-                gen->pop("rax");
-                gen->pop("rbx");
-                gen->m_output << "    add rax, rbx\n";
-                gen->push("rax");
-            }
-            void operator()(const NodeBinExprMulti* multi) const
-            {
-                gen->gen_expr(multi->rhs);
-                gen->gen_expr(multi->lhs);
-                gen->pop("rax");
-                gen->pop("rbx");
-                gen->m_output << "    mul rbx\n";
-                gen->push("rax");
-            }
-            void operator()(const NodeBinExprDiv* div) const
-            {
-                gen->gen_expr(div->rhs);
-                gen->gen_expr(div->lhs);
-                gen->pop("rax");
-                gen->pop("rbx");
-                gen->m_output << "    div rbx\n";
-                gen->push("rax");
-            }
-        };
-
-        BinExprVisitor visitor { .gen = this };
-        std::visit(visitor, bin_expr->var);
-    }
-
     void gen_expr(const NodeExpr* expr)
     {
         struct ExprVisitor {
@@ -96,7 +50,44 @@ public:
             }
             void operator()(const NodeBinExpr* bin_expr) const
             {
-                gen->gen_bin_expr(bin_expr);
+                switch (bin_expr->op) {
+                case BinOp::add: {
+                    gen->gen_expr(bin_expr->rhs);
+                    gen->gen_expr(bin_expr->lhs);
+                    gen->pop("rax");
+                    gen->pop("rbx");
+                    gen->m_output << "    add rax, rbx\n";
+                    gen->push("rax");
+                    break;
+                }
+                case BinOp::sub: {
+                    gen->gen_expr(bin_expr->rhs);
+                    gen->gen_expr(bin_expr->lhs);
+                    gen->pop("rax");
+                    gen->pop("rbx");
+                    gen->m_output << "    sub rax, rbx\n";
+                    gen->push("rax");
+                    break;
+                }
+                case BinOp::mul: {
+                    gen->gen_expr(bin_expr->rhs);
+                    gen->gen_expr(bin_expr->lhs);
+                    gen->pop("rax");
+                    gen->pop("rbx");
+                    gen->m_output << "    mul rbx\n";
+                    gen->push("rax");
+                    break;
+                }
+                case BinOp::div: {
+                    gen->gen_expr(bin_expr->rhs);
+                    gen->gen_expr(bin_expr->lhs);
+                    gen->pop("rax");
+                    gen->pop("rbx");
+                    gen->m_output << "    div rbx\n";
+                    gen->push("rax");
+                    break;
+                }
+                }
             }
         };
 
