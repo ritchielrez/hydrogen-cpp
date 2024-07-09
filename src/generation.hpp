@@ -29,7 +29,7 @@ public:
                     exit(EXIT_FAILURE);
                 }
                 std::stringstream offset;
-                offset << "QWORD [rsp + " << (gen.m_stack_size - (*it).stack_loc - 1) * 8 << "]";
+                offset << "QWORD [rsp + " << (gen.m_stack_size - it->stack_loc - 1) * 8 << "]";
                 gen.push(offset.str());
             }
             void operator()(const NodeTermParen* term_paren) const
@@ -121,9 +121,8 @@ public:
             void operator()(const NodeStmtExit* stmt_exit) const
             {
                 gen.gen_expr(stmt_exit->expr);
-                gen.m_output << "    mov rax, 60\n";
-                gen.pop("rdi");
-                gen.m_output << "    syscall\n";
+                gen.pop("rcx");
+                gen.m_output << "    call ExitProcess\n";
             }
             void operator()(const NodeStmtLet* stmt_let) const
             {
@@ -159,15 +158,14 @@ public:
 
     [[nodiscard]] std::string gen_prog()
     {
-        m_output << "global _start\n_start:\n";
+        m_output << "extern ExitProcess\nglobal main\nsection .text:\nmain:\n";
 
         for (const NodeStmt* stmt : m_prog.stmts) {
             gen_stmt(stmt);
         }
 
-        m_output << "    mov rax, 60\n";
-        m_output << "    mov rdi, 0\n";
-        m_output << "    syscall\n";
+        m_output << "    mov rcx, 0\n";
+        m_output << "    call ExitProcess\n";
         return m_output.str();
     }
 
