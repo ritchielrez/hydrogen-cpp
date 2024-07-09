@@ -181,7 +181,7 @@ public:
                 expr->var = div;
             }
             else {
-                assert(false); // Unreachable;
+                assert(false && "Unreachable");
             }
             expr_lhs->var = expr;
         }
