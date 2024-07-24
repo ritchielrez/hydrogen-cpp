@@ -167,9 +167,8 @@ public:
             {
                 gen.m_output << "    ;; exit\n";
                 gen.gen_expr(stmt_exit->expr);
-                gen.m_output << "    mov rax, 60\n";
-                gen.pop("rdi");
-                gen.m_output << "    syscall\n";
+                gen.pop("rcx");
+                gen.m_output << "    call ExitProcess\n";
                 gen.m_output << "    ;; /exit\n";
             }
 
@@ -238,15 +237,14 @@ public:
 
     [[nodiscard]] std::string gen_prog()
     {
-        m_output << "global _start\n_start:\n";
+        m_output << "extern ExitProcess\nglobal main\nsection .text:\nmain:\n";
 
         for (const NodeStmt* stmt : m_prog.stmts) {
             gen_stmt(stmt);
         }
 
-        m_output << "    mov rax, 60\n";
-        m_output << "    mov rdi, 0\n";
-        m_output << "    syscall\n";
+        m_output << "    mov rcx, 0\n";
+        m_output << "    call ExitProcess\n";
         return m_output.str();
     }
 
