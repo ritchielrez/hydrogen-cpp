@@ -199,6 +199,7 @@ public:
                 gen.m_output << label << ":\n";
                 if (stmt_if->pred.has_value()) {
                     const std::string end_label = gen.create_label();
+                    gen.m_output << "    jmp " << end_label << "\n";
                     gen.gen_if_pred(stmt_if->pred.value(), end_label);
                     gen.m_output << end_label << ":\n";
                 }
